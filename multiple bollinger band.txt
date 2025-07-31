@@ -1,0 +1,36 @@
+instrument {
+    name = "Bollinger Bands Multi-Timeframe (No Middle, Custom Colors)",
+    short_name = "BBands Custom MT",
+    overlay = true
+}
+
+input_group {
+    "Bollinger Band Settings",
+    length = input(20, "SMA Period"),
+    mult   = input(2.0, "Deviation Multiplier", input.double),
+    bull_color = input { default = "#00FF00", type = input.color }, -- Upper Band
+    bear_color = input { default = "#FF0000", type = input.color }  -- Lower Band
+}
+
+-- Determine timeframe based on chart resolution
+local resolution = "day"
+if is_intraday then
+    resolution = "1m"
+elseif is_intrahour then
+    resolution = "4H"
+end
+
+-- Fetch data for the selected timeframe
+sec = security(current_ticker_id, resolution)
+
+if sec then
+    -- Bollinger Band Calculations
+    local basis = sma(sec.close, length)
+    local dev   = mult * stdev(sec.close, length)
+    local upper = basis + dev
+    local lower = basis - dev
+    
+    -- Plot Upper and Lower Bands with user-selected colors
+    plot(upper, "Upper Band", bull_color)
+    plot(lower, "Lower Band", bear_color)
+end

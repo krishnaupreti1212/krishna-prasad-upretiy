@@ -1,0 +1,27 @@
+instrument { name = "Volume + SMA (Rect)", short_name = "VolSMA Rect" }
+
+input_group {
+    "SMA Settings",
+    sma_length = input(20, "SMA Length"),
+    sma_color = input { default = "#FFA500", type = input.color },
+    sma_width = input { default = 1, type = input.line_width }
+}
+
+input_group {
+    "Volume Bar Colors",
+    bull_color = input { default = "#00FF00", type = input.color },
+    bear_color = input { default = "#FF0000", type = input.color }
+}
+
+-- Determine bullish or bearish candle
+bar_is_bull = close > open
+bar_color = bar_is_bull and bull_color or bear_color
+
+-- Calculate SMA of volume
+vol_sma = sma(volume, sma_length)
+
+-- Plot volume bars using rectangles (column style)
+rect(0, volume, "", bar_color, 0.6)
+
+-- Plot SMA as a line
+plot(vol_sma, "SMA", sma_color, sma_width, style_line)

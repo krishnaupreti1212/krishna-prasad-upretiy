@@ -1,0 +1,22 @@
+instrument {
+    name = "Cumulative Volume Delta (CVD) - Candle",
+    short_name = "CVD Candle",
+    overlay = false
+}
+
+bull_color = input { default = "#00FF00", type = input.color }
+bear_color = input { default = "#FF0000", type = input.color }
+
+delta = close > close[1] and volume or
+        close < close[1] and -volume or 0
+
+cvd = nz(cvd[1]) + delta
+cvd_prev = nz(cvd[1])
+cvd_open = nz(cvd[1])
+cvd_close = cvd
+cvd_high = math.max(cvd_open, cvd_close)
+cvd_low = math.min(cvd_open, cvd_close)
+
+candle_color = cvd_close >= cvd_open and bull_color or bear_color
+
+plot_candle(cvd_open, cvd_high, cvd_low, cvd_close, "CVD Candle", candle_color)

@@ -1,0 +1,63 @@
+ instrument {
+    name = "Bollinger Bands (No Middle, Custom Colors)",
+    short_name = "BBands Custom Color",
+    overlay = true
+}
+
+input_group {
+    "Bollinger Band Settings",
+    length = input(20, "SMA Period"),
+    mult   = input(2.0, "Deviation Multiplier", input.double),
+    bull_color = input { default = "#00FF00", type = input.color }, -- Upper Band
+    bear_color = input { default = "#FF0000", type = input.color }  -- Lower Band
+}
+
+-- Source
+source = close
+
+-- Bollinger Band Calculations
+basis = sma(source, length)
+dev   = mult * stdev(source, length)
+upper = basis + dev
+lower = basis - dev
+
+-- Plot Upper and Lower Bands with user-selected colors
+plot(upper, "Upper Band", bull_color)
+plot(lower, "Lower Band", bear_color)
+
+-- (Middle band is intentionally not plotted)
+
+
+
+
+
+instrument {
+    name = "Bollinger Bands Multi-Timeframe (No Middle, Custom Colors)",
+    short_name = "BBands Custom MT",
+    overlay = true
+}
+
+input_group {
+    "Bollinger Band Settings",
+    length = input(20, "SMA Period"),
+    mult = input(2.0, "Deviation Multiplier", input.double),
+    bull_color = input { default = "#00FF00", type = input.color }, -- Upper Band
+    bear_color = input { default = "#FF0000", type = input.color }  -- Lower Band
+}
+
+-- Fetch 1-minute close price data
+local close_1m = close(timeframe("1m"))
+
+-- Check for valid data to avoid nil errors
+if not is_na(close_1m) then
+    -- Calculate Bollinger Bands on 1-minute data
+    local basis = sma(close_1m, length)
+    local dev = mult * stdev(close_1m, length)
+    if not is_na(basis) and not is_na(dev) then
+        local upper = basis + dev
+        local lower = basis - dev
+        -- Plot Upper and Lower Bands with user-selected colors
+        plot(upper, "Upper Band", bull_color)
+        plot(lower, "Lower Band", bear_color)
+    end
+end
